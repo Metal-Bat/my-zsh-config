@@ -84,7 +84,8 @@ sudo apt install -y \
     yt-dlp \
     zip \
     zlib1g-dev \
-    zsh
+    zsh \
+    zoxide
 
 ```
 
