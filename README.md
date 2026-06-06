@@ -49,21 +49,40 @@ Reboot.
 sudo apt update
 
 sudo apt install -y \
-    git \
-    curl \
-    wget \
-    vim \
-    zsh \
-    fzf \
     bat \
+    build-essential \
+    curl \
     eza \
-    jq \
-    htop \
-    unzip \
-    zip \
-    ripgrep \
     fd-find \
-    tmux
+    fzf \
+    git \
+    golang \
+    htop \
+    jq \
+    libbz2-dev \
+    libffi-dev \
+    liblzma-dev \
+    libncursesw5-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    libssl-dev \
+    libxml2-dev \
+    libxmlsec1-dev \
+    lsd \
+    ripgrep \
+    thefuck \
+    tk-dev \
+    tmux \
+    unzip \
+    vim \
+    vlc \
+    wget \
+    xz-utils \
+    yt-dlp \
+    zip \
+    zlib1g-dev \
+    zsh
+
 ```
 
 ---
@@ -256,3 +275,30 @@ done
 echo
 echo "All plugins installed."
 ```
+
+## 11. Install mise, pyenv, rust and cargo utils
+```bash
+
+curl https://mise.run | sh
+curl https://pyenv.run | bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+
+cargo install \
+    bandwhich \
+    bottom \
+    cargo-update \
+    du-dust \
+    git-cliff \
+    linutil_tui \
+    navi \
+    toipe \
+    tokei \
+    topgrade \
+    tre-command \
+    tree-sitter-cli \
+    wallust
+```
+
+
+
