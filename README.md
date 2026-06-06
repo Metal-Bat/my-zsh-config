@@ -51,12 +51,15 @@ sudo apt update
 sudo apt install -y \
     bat \
     build-essential \
+    ca-certificates \
     curl \
+    docker* \
     eza \
     fd-find \
     fzf \
     git \
     golang \
+    gnupg \
     htop \
     jq \
     libbz2-dev \
@@ -87,10 +90,16 @@ sudo apt install -y \
 
 ---
 
-## 4. Set Zsh as Default Shell
+## 4. Set Docker needs
 
 ```bash
-chsh -s $(which zsh)
+sudo usermod -aG docker "$USER"
+sudo chmod 660 /var/run/docker.sock
+sudo systemctl restart docker
+DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+mkdir -p $DOCKER_CONFIG/cli-plugins
+curl -SL https://github.com/docker/compose/releases/download/v5.1.2/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
+chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
 ```
 
 Log out and back in.
