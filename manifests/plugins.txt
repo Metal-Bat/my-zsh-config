@@ -1,0 +1,11 @@
+# profile|directory under ZSH_CUSTOM|repository
+# Directory names must match .zshrc; never infer them from repository basenames.
+core|themes/powerlevel10k|https://github.com/romkatv/powerlevel10k.git
+core|plugins/zsh-autosuggestions|https://github.com/zsh-users/zsh-autosuggestions.git
+core|plugins/zsh-history-substring-search|https://github.com/zsh-users/zsh-history-substring-search.git
+core|plugins/you-should-use|https://github.com/MichaelAquilina/zsh-you-should-use.git
+core|plugins/fast-syntax-highlighting|https://github.com/zdharma-continuum/fast-syntax-highlighting.git
+core|plugins/zsh-256color|https://github.com/chrissicool/zsh-256color.git
+extra|plugins/docker-helpers|https://github.com/unixorn/docker-helpers.zshplugin.git
+extra|plugins/git-flow-completion|https://github.com/bobthecow/git-flow-completion.git
+extra|plugins/ssh-connect|https://github.com/gko/ssh-connect.git

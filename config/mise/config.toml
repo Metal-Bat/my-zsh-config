@@ -1,0 +1,14 @@
+# Global helper only. Add language runtimes to a project's mise.toml.
+[tools]
+usage = "latest"
+
+[settings]
+not_found_system_fallback = true
+# Python stays outside mise, including in projects, until you change this.
+disable_tools = ["python"]
+activate_shims = false
+not_found_auto_install = false
+
+# For the standalone ~/.local/bin/mise installation; see docs/mise.md.
+[settings.self_update]
+auto = true

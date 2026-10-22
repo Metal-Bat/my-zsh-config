@@ -1,0 +1,15 @@
+# Optional workstation tools; use install-apt.sh --extras.
+ansible
+boxes
+cowsay
+eza
+fortune-mod
+fortunes-min
+golang-go
+htop
+httpie
+kubectx
+lolcat
+tmux
+vlc
+wget

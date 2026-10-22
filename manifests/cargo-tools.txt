@@ -1,0 +1,31 @@
+# profile|crate|observed-version|executables (comma separated)
+# Versions are the owner's 2026-10-22 snapshot, not an automatic lockfile.
+# core = shell/editor integrations; extra = standalone tools.
+# legacy = explicit opt-in; see docs/tools.md for exa and btop provenance.
+core|atuin|18.24.1|atuin
+extra|bandwhich|0.23.1|bandwhich
+extra|bottom|0.14.9|btm
+legacy|btop|0.1.0|btop
+extra|cargo-update|22.1.1|cargo-install-update,cargo-install-update-config
+extra|csvlens|0.15.1|csvlens
+extra|du-dust|1.2.6|dust
+extra|dua-cli|2.46.0|dua
+extra|eva|0.3.1|eva
+legacy|exa|0.10.1|exa
+extra|git-cliff|2.14.2|git-cliff,git-cliff-completions,git-cliff-mangen
+extra|htmlq|0.4.0|htmlq
+extra|jql|9.0.3|jql
+extra|linutil_tui|26.7.17|linutil
+core|navi|2.24.0|navi
+git|rtk|1.0.1|rtk
+extra|spacer|0.5.0|spacer
+extra|television|0.15.9|tv
+core|tlrc|1.13.1|tldr
+extra|toipe|0.5.0|randomword,toipe
+extra|tokei|15.0.0|tokei
+extra|topgrade|17.14.1|topgrade
+extra|tre-command|0.4.0|tre
+core|tree-sitter-cli|0.27.1|tree-sitter
+extra|wallust|3.5.1|wallust
+extra|xplr|1.1.2|xplr
+extra|xsv|0.13.0|xsv

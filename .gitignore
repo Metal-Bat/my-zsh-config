@@ -1,0 +1,8 @@
+# Personal overrides and generated state stay out of this public repository.
+config/kitty/current-theme.conf
+config/kitty/local.conf
+config/zsh/local.zsh
+.p10k.zsh
+*.bak
+*.log
+.DS_Store
