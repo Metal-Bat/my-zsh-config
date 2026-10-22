@@ -37,6 +37,9 @@ while IFS='|' read -r profile relative url; do
     [[ $profile == core ]] || continue
     if [[ -d $custom_dir/$relative ]]; then ok "$relative"; else warn "Missing $relative"; fi
 done < "$repo_dir/manifests/plugins.txt"
+if [[ -r $custom_dir/plugins/colorize/colorize.plugin.zsh && ! -r $custom_dir/plugins/colors/colors.plugin.zsh ]]; then
+    warn 'Custom colorize needs zpm-zsh/colors first; run scripts/install-plugins.sh --apply. The shared config skips incomplete colorize.'
+fi
 
 printf '\nEnvironment checks\n'
 if [[ -n ${VIRTUAL_ENV:-} ]]; then warn "An active virtual environment is inherited: $VIRTUAL_ENV"; fi

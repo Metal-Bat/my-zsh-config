@@ -106,6 +106,51 @@ run_clean zsh -d -i -c '[[ ${_comps[myzsh-safe-probe]-} == _myzsh_safe_probe && 
 [[ $(cat "$case_out") == completion-audit-ok ]] || { cat "$case_out" >&2; fail 'Completion audit prompted or emitted startup errors'; }
 pass 'Fallback completion skips insecure directories and keeps safe completions without prompting'
 
+new_case colorize_dependency
+mkdir -p "$fixture_zsh/plugins/colorize" "$fixture_custom/plugins/colorize" "$fixture_custom/plugins/colors" "$fixture_config/zsh"
+cat > "$fixture_zsh/oh-my-zsh.sh" <<'MOCK'
+autoload -Uz compinit
+compinit -i
+# OMZ exposes ANSI-valued color names. Without associative c, c[bold] is math.
+bold=$'\e[1m'
+for plugin in "${plugins[@]}"; do
+    if [[ -r "$ZSH_CUSTOM/plugins/$plugin/$plugin.plugin.zsh" ]]; then
+        source "$ZSH_CUSTOM/plugins/$plugin/$plugin.plugin.zsh"
+    elif [[ -r "$ZSH/plugins/$plugin/$plugin.plugin.zsh" ]]; then
+        source "$ZSH/plugins/$plugin/$plugin.plugin.zsh"
+    fi
+done
+unset plugin
+MOCK
+cat > "$fixture_custom/plugins/colorize/colorize.plugin.zsh" <<'MOCK'
+export LESS_TERMCAP_md="${c[bold]}${c[springgreen]}${c[italic]:-${c[coursive]}}"
+(( COLORIZE_LOADS += 1 ))
+MOCK
+printf '(( BUNDLED_COLORIZE_LOADS += 1 ))\n' > "$fixture_zsh/plugins/colorize/colorize.plugin.zsh"
+printf 'MYZSH_EXTRA_PLUGINS=(colorize colors colorize)\n' > "$fixture_config/zsh/plugins.zsh"
+run_clean bash "$repo_dir/install.sh" --apply --only zsh > "$case_out" 2>&1
+run_clean zsh -d -i -c '(( ${COLORIZE_LOADS:-0} == 0 && ${BUNDLED_COLORIZE_LOADS:-0} == 0 )) && print -r -- missing-dependency-ok' > "$case_out" 2>&1 || { cat "$case_out" >&2; fail 'Incomplete custom colorize broke startup'; }
+[[ $(cat "$case_out") == missing-dependency-ok ]] || { cat "$case_out" >&2; fail 'Missing colorize dependency emitted startup errors'; }
+cat > "$fixture_custom/plugins/colors/colors.plugin.zsh" <<'MOCK'
+(( COLORS_LOADS += 1 ))
+typeset -Ag c=(bold $'\e[1m' springgreen $'\e[92m' italic $'\e[3m')
+MOCK
+run_clean zsh -d -i -c '[[ ${(t)c} == *association* && $LESS_TERMCAP_md == "${c[bold]}${c[springgreen]}${c[italic]}" ]] && (( COLORS_LOADS == 1 && COLORIZE_LOADS == 1 && ${BUNDLED_COLORIZE_LOADS:-0} == 0 )) && print -r -- dependency-order-ok' > "$case_out" 2>&1 || { cat "$case_out" >&2; fail 'Custom colorize did not load once after its dependency'; }
+[[ $(cat "$case_out") == dependency-order-ok ]] || { cat "$case_out" >&2; fail 'Custom colorize emitted startup errors'; }
+pass 'Custom colorize skips a missing dependency and loads once after its color table is available'
+for preference in NO_COLOR=1 CLICOLOR=0; do
+    run_clean env "$preference" zsh -d -i -c '(( ${COLORS_LOADS:-0} == 0 && ${COLORIZE_LOADS:-0} == 0 )) && print -r -- colors-disabled-ok' > "$case_out" 2>&1 || { cat "$case_out" >&2; fail 'Disabled custom colors were still loaded'; }
+    [[ $(cat "$case_out") == colors-disabled-ok ]] || { cat "$case_out" >&2; fail 'Disabled colorize emitted startup errors'; }
+done
+# A present dependency that never defines c must not make the unsafe expansion run.
+printf '(( COLORS_LOADS += 1 ))\n' > "$fixture_custom/plugins/colors/colors.plugin.zsh"
+run_clean zsh -d -i -c '(( COLORS_LOADS == 1 && ${COLORIZE_LOADS:-0} == 0 )) && print -r -- missing-table-ok' > "$case_out" 2>&1 || { cat "$case_out" >&2; fail 'Custom colorize ran without an associative color table'; }
+[[ $(cat "$case_out") == missing-table-ok ]] || { cat "$case_out" >&2; fail 'Missing color table emitted startup errors'; }
+mv "$fixture_custom/plugins/colorize/colorize.plugin.zsh" "$case_dir/custom-colorize-disabled"
+run_clean zsh -d -i -c '(( BUNDLED_COLORIZE_LOADS == 1 && ${COLORIZE_LOADS:-0} == 0 )) && print -r -- bundled-fallback-ok' > "$case_out" 2>&1 || { cat "$case_out" >&2; fail 'Bundled colorize fallback did not load'; }
+[[ $(cat "$case_out") == bundled-fallback-ok ]] || { cat "$case_out" >&2; fail 'Bundled colorize emitted startup errors'; }
+pass 'Custom colorize respects disabled colors and a missing color table; bundled fallback loads only without a custom copy'
+
 new_case preflight
 mkdir -p "$fixture_zdot" "$fixture_config/mise/config.toml"
 printf 'keep this\n' > "$fixture_zdot/.zshrc"

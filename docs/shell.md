@@ -14,6 +14,7 @@ you install the essentials first and add the larger tool collection later.
 | Paths | Add local binaries, Cargo, Go, Neovim and Flatpak | Integrations can find their executables when they initialize |
 | Basics | Configure history, Emacs editing and a fallback prompt | A working interactive shell does not depend on Oh My Zsh |
 | Oh My Zsh | Load installed plugin candidates and the available theme | Supply completion and familiar command shortcuts |
+| Command colors | Load zpm's colors dependency before its custom colorize plugin | Preserve the original command coloring without the plugin-name collision |
 | Aliases | Set portable shortcuts after Oh My Zsh | Repository shortcuts have predictable final definitions |
 | Integrations | Initialize fzf, zoxide, mise, Atuin and Navi once each | Keep each shortcut and hook under one integration |
 | Personal setup | Load `~/.p10k.zsh` and `~/.config/zsh/local.zsh` if present | Preserve your prompt and machine-specific preferences |
@@ -152,7 +153,6 @@ for example, the Docker plugin does not install the Docker daemon.
 | --- | --- | --- |
 | `ansible` | Ansible completion and shortcuts | Complete playbook and inventory commands |
 | `colored-man-pages` | Color in supported manual-page pagers | `man tar` |
-| `colorize` | Syntax-colored file viewing | `ccat file.py`; requires a supported highlighter |
 | `debian` | Debian/APT shortcuts | Consult `alias` for the installed OMZ version's aliases |
 | `dirhistory` | Directory-history navigation | Move back through visited working directories |
 | `docker` | Docker completion and aliases | Complete `docker` subcommands |
@@ -188,6 +188,8 @@ failures in the previous installer example.
 
 | Directory | Upstream | Purpose |
 | --- | --- | --- |
+| `colors` | [zpm-zsh/colors](https://github.com/zpm-zsh/colors) | Supply the associative color map required by the custom colorize plugin |
+| `colorize` | [zpm-zsh/colorize](https://github.com/zpm-zsh/colorize) | Color settings for GCC, grep and less, plus command aliases; loaded after its colors dependency |
 | `zsh-autosuggestions` | [zsh-users/zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) | Suggest previous commands as you type |
 | `zsh-history-substring-search` | [zsh-users/zsh-history-substring-search](https://github.com/zsh-users/zsh-history-substring-search) | Up/Down substring search |
 | `you-should-use` | [MichaelAquilina/zsh-you-should-use](https://github.com/MichaelAquilina/zsh-you-should-use) | Remind you when a matching alias exists |
@@ -204,6 +206,48 @@ installer clones submodules and repairs an ordinary clone missing that dependenc
 when you add `--apply`; `.zshrc` skips an incomplete helper quietly. The OMZ
 `thefuck` plugin is also skipped when its executable is missing, avoiding its
 otherwise noisy installation reminder.
+
+### Colorize and its dependency
+
+The original setup installed **zpm-zsh/colorize** in
+`~/.oh-my-zsh/custom/plugins/colorize`. It configures command colors and aliases;
+it requires **zpm-zsh/colors** to be loaded first. The old installation example
+omitted that dependency. Without its associative array `c`, expressions such as
+`${c[bold]}` can be interpreted as arithmetic and produce the startup error
+`bad math expression: illegal character: ^[` when a color variable contains an
+escape character.
+
+Oh My Zsh also ships an unrelated **bundled colorize** plugin. That one provides
+`ccat` and `cless` for syntax-colored file viewing with Pygments or Chroma. The
+custom plugin normally shadows it, so a plain `colorize` entry in `plugins=(...)`
+does not tell you which feature will load.
+
+This configuration handles the distinction explicitly:
+
+1. When the custom colorize file exists, load the custom `colors` dependency
+   first and verify that `c` is an associative array before loading colorize.
+2. If the dependency is missing, skip that component quietly; `scripts/doctor.sh`
+   reports the incomplete installation. No package is fetched during startup.
+3. When `NO_COLOR` is nonempty or `CLICOLOR=0`, skip the custom color plugins.
+4. When no custom colorize file exists, use the bundled plugin by its exact path
+   as a compatibility fallback. Only this fallback supplies `ccat` and `cless`.
+
+Both custom plugins are included in the core installation plan. Run the installer
+to supply the missing dependency while preserving existing checkouts:
+
+```bash
+./scripts/install-plugins.sh --apply
+exec zsh
+```
+
+`colors` and `colorize` are reserved in the plugin selection hook; adding them to
+`MYZSH_EXTRA_PLUGINS` does not load a second copy. Do not create an empty `c` array
+as a workaround: the dependency supplies the actual named color values. For
+ordinary syntax-colored file viewing, use `bat` (Debian's `batcat`).
+
+See the upstream [custom colorize dependency instructions](https://github.com/zpm-zsh/colorize#how-to-install),
+[colors load-order instructions](https://github.com/zpm-zsh/colors#installation),
+and [bundled OMZ colorize documentation](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/colorize).
 
 ## Why several old plugins disappeared
 
@@ -240,6 +284,8 @@ Names are deduplicated and unavailable plugins are skipped. See
 which ones suit particular workflows. Do not add `mise`, `z`, another history
 integration or another syntax highlighter without also adjusting the existing
 integration that handles the same job.
+The names `colors` and `colorize` are handled by the explicit dependency-aware
+loader described above and are excluded from this generic selection hook.
 
 For aliases, settings and keybindings that apply **after** the shared setup,
 use the separate `local.zsh` file below.

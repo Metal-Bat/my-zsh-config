@@ -76,6 +76,7 @@ is diagnostic output, not proof that the rest of the setup failed.
 | Ctrl-R opens the wrong history UI | Use a new shell; `bindkey '^R'` should show Atuin when installed; remove personal duplicate history bindings |
 | Ctrl-Space is intercepted | Use navi's Ctrl-G binding, or choose another binding in `local.zsh` |
 | A plugin name is missing | Compare `manifests/plugins.txt`, its directory name and the `.plugin.zsh` file; install the intended plugin |
+| Custom `colorize` reports `bad math expression: illegal character: ^[` | The old `zpm-zsh/colorize` install needs `zpm-zsh/colors` loaded first. Run `./scripts/install-plugins.sh --apply`, deploy the updated Zsh config with `./install.sh --only zsh --apply`, then start a fresh shell. See [colorize dependencies](shell.md#colorize-and-its-dependency). |
 | `bat` works in shell but an editor cannot find it | A Zsh alias is not an executable; configure the editor to use `batcat` or provide an intentional user-local wrapper |
 | `/usr/bin/nvim` wins over `/opt` | Verify `/opt/nvim-linux-x86_64/bin/nvim` exists and is executable; restart and run `type -a nvim` |
 | Missing icons / square boxes | Install all MesloLGS NF faces; confirm Kitty font selection and Nerd Font compatibility |

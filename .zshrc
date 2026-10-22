@@ -46,11 +46,13 @@ typeset -ga MYZSH_EXTRA_PLUGINS
 typeset -U plugins
 plugins=()
 for _myzsh_plugin in \
-  ansible colored-man-pages colorize debian dirhistory docker docker-compose \
+  ansible colored-man-pages debian dirhistory docker docker-compose \
   emoji encode64 extract git golang helm history httpie jsontools kubectl \
   man ssh sudo tldr thefuck vscode web-search \
   docker-helpers git-flow-completion zsh-256color you-should-use \
   zsh-autosuggestions zsh-history-substring-search "${MYZSH_EXTRA_PLUGINS[@]}"; do
+  # These names are loaded explicitly below: custom and bundled colorize differ.
+  [[ $_myzsh_plugin == colors || $_myzsh_plugin == colorize ]] && continue
   # This upstream plugin prints an error instead of quietly skipping itself.
   [[ $_myzsh_plugin == thefuck ]] && (( ! $+commands[thefuck] )) && continue
   if [[ -r "$ZSH_CUSTOM/plugins/$_myzsh_plugin/$_myzsh_plugin.plugin.zsh" ||
@@ -64,6 +66,20 @@ unset _myzsh_plugin
 
 if [[ -r "$ZSH/oh-my-zsh.sh" ]]; then
   source "$ZSH/oh-my-zsh.sh"
+  # zpm-zsh/colorize needs the associative color map from zpm-zsh/colors first.
+  # Keep an existing custom checkout; incomplete installs are reported by doctor.
+  if [[ -r "$ZSH_CUSTOM/plugins/colorize/colorize.plugin.zsh" ]]; then
+    if [[ -r "$ZSH_CUSTOM/plugins/colors/colors.plugin.zsh" &&
+          -z ${NO_COLOR:-} && ${CLICOLOR:-} != 0 ]]; then
+      source "$ZSH_CUSTOM/plugins/colors/colors.plugin.zsh"
+      if [[ ${(t)c} == *association* ]]; then
+        source "$ZSH_CUSTOM/plugins/colorize/colorize.plugin.zsh"
+      fi
+    fi
+  elif [[ -r "$ZSH/plugins/colorize/colorize.plugin.zsh" ]]; then
+    # OMZ's bundled plugin provides ccat/cless, not zpm's command color settings.
+    source "$ZSH/plugins/colorize/colorize.plugin.zsh"
+  fi
 else
   autoload -Uz compinit
   # Exclude insecure completion paths without a prompt (also works without a TTY).

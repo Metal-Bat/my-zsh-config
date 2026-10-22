@@ -87,6 +87,8 @@ stops before the install transaction. See [release differences](docs/installatio
 
 This installs Oh My Zsh, Powerlevel10k, autosuggestions, history substring
 search, alias hints, terminal color support and fast syntax highlighting.
+It also installs the original `zpm-zsh/colorize` command-coloring plugin with
+its required `zpm-zsh/colors` dependency; the shell loads that dependency first.
 Existing directories are kept. It does not replace `.zshrc` or change your
 login shell.
 
