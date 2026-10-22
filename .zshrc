@@ -66,7 +66,8 @@ if [[ -r "$ZSH/oh-my-zsh.sh" ]]; then
   source "$ZSH/oh-my-zsh.sh"
 else
   autoload -Uz compinit
-  compinit
+  # Exclude insecure completion paths without a prompt (also works without a TTY).
+  compinit -i
 fi
 
 # 4. Portable aliases. Executable paths come from PATH, never an old pyenv env.

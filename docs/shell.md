@@ -22,6 +22,19 @@ you install the essentials first and add the larger tool collection later.
 The configuration is for **interactive Zsh**. Non-interactive commands do not
 normally read `.zshrc`; scripts should set their own required environment.
 
+Without Oh My Zsh, completion initializes with `compinit -i`. Zsh still checks
+completion-file ownership and directory permissions, but excludes insecure
+entries without prompting. This also lets an interactive shell initialize when
+its input is a pipe, as in CI. To inspect the default system completion paths:
+
+```zsh
+zsh -f -c 'autoload -Uz compaudit; compaudit'
+```
+
+If a completion is missing because its directory was excluded, review the
+reported ownership and permissions before using it. The fallback does not use
+`compinit -u`, which would accept insecure paths.
+
 ## Paths and programs
 
 The shell adds the following locations. Nonexistent directories are harmless and
@@ -274,6 +287,7 @@ exec zsh
 
 ## Upstream references
 
+- [Zsh completion initialization and security checks](https://zsh.sourceforge.io/Doc/Release/Completion-System.html#Use-of-compinit)
 - [Oh My Zsh plugin directory](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins)
 - [Powerlevel10k setup and font instructions](https://github.com/romkatv/powerlevel10k)
 - [Atuin initialization flags](https://docs.atuin.sh/main/reference/init/)

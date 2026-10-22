@@ -94,6 +94,18 @@ run_clean zsh -d -i -c '[[ -n $PROMPT ]] && print -r -- fresh-zsh-ok' > "$case_o
 [[ $(cat "$case_out") == fresh-zsh-ok ]] || { cat "$case_out" >&2; fail 'Fresh HOME interactive Zsh failed or emitted startup errors'; }
 pass 'Interactive Zsh starts with the installed config and no Oh My Zsh checkout'
 
+new_case completion_permissions
+mkdir -p "$fixture_zdot" "$case_dir/safe completions" "$case_dir/unsafe completions"
+printf '#compdef myzsh-safe-probe\n' > "$case_dir/safe completions/_myzsh_safe_probe"
+printf '#compdef myzsh-unsafe-probe\n' > "$case_dir/unsafe completions/_myzsh_unsafe_probe"
+chmod 700 "$case_dir/safe completions"
+chmod 777 "$case_dir/unsafe completions"
+printf 'fpath=(%q %q $fpath)\n' "$case_dir/safe completions" "$case_dir/unsafe completions" > "$fixture_zdot/.zshenv"
+run_clean bash "$repo_dir/install.sh" --apply --only zsh > "$case_out" 2>&1
+run_clean zsh -d -i -c '[[ ${_comps[myzsh-safe-probe]-} == _myzsh_safe_probe && -z ${_comps[myzsh-unsafe-probe]-} ]] && print -r -- completion-audit-ok' > "$case_out" 2>&1 || { cat "$case_out" >&2; fail 'Completion security filtering failed'; }
+[[ $(cat "$case_out") == completion-audit-ok ]] || { cat "$case_out" >&2; fail 'Completion audit prompted or emitted startup errors'; }
+pass 'Fallback completion skips insecure directories and keeps safe completions without prompting'
+
 new_case preflight
 mkdir -p "$fixture_zdot" "$fixture_config/mise/config.toml"
 printf 'keep this\n' > "$fixture_zdot/.zshrc"
