@@ -1,9 +1,17 @@
 # Tool catalog and practical examples
 
+[Back to the README](../README.md)
+
+The main `./install.sh` installs this complete tool collection. Read this page
+to discover what each program does and what to type first. The
+[installation guide](installation.md) explains where the programs come from.
+
 The versions below are the owner's **2026-10-22 `cargo install --list`
 snapshot**. They are not a claim that each is the newest release. The
 [manifest](../manifests/cargo-tools.txt) is the installer's machine-readable
-inventory and retains every reported crate and executable.
+inventory and retains every reported crate and executable. Existing Cargo
+installations are kept; missing crates are installed from current releases.
+The recorded version column does not force the installer to downgrade a tool.
 
 ## Choose the tool for the job
 
@@ -12,8 +20,8 @@ inventory and retains every reported crate and executable.
 | Command history | Atuin | Zsh substring search remains useful on Up/Down; avoid another Ctrl-R owner |
 | Find a directory | zoxide `z` / `zi` | fzf's Alt-C is a direct filesystem picker |
 | Search files or text | `fdfind`, `rg`, fzf | Television adds configurable interactive channels |
-| Read a file | `bat` / `batcat` | Plain `cat` stays available for pipelines |
-| List files | `lsd` and `l` | `tre` shows hierarchy; `eza` is another deliberate alternative |
+| Read a file | `bat` / `batcat`; `cat` uses bat here | `rcat` or `command cat` selects plain cat for pipelines |
+| List files | `lsd` and `l` | `tre` shows hierarchy; `eza` and the recorded `exa` are available too |
 | Diagnose disk usage | `dust` for an overview; `dua i` to explore | Their interfaces solve slightly different tasks |
 | Diagnose processes | `btm` | htop or Debian btop are alternatives; choose the one you prefer |
 | Inspect structured data | `jq`, `csvlens`, `xsv`, `htmlq` | JSON, CSV and HTML require different query tools |
@@ -30,13 +38,13 @@ what Cargo installs; the **command** is what you type. They are often different.
 | [atuin](https://github.com/atuinsh/atuin) · 18.24.1 | `atuin` | Search shell history with context; press **Ctrl-R** or run `atuin search` |
 | [bandwhich](https://github.com/imsnif/bandwhich) · 0.23.1 | `bandwhich` | Live network usage by process/connection; `sudo "$(command -v bandwhich)"` |
 | [bottom](https://github.com/ClementTsang/bottom) · 0.14.9 | `btm` | Interactive CPU, memory, disk and process monitor; run `btm` |
-| [btop](https://crates.io/crates/btop) · 0.1.0 | `btop` | Recorded Cargo package; verify provenance before reproducing it; see the note below |
+| [btop](https://crates.io/crates/btop) · 0.1.0 | `btop` | Recorded Cargo package, included in the installation; see the provenance and PATH note below |
 | [cargo-update](https://github.com/nabijaczleweli/cargo-update) · 22.1.1 | `cargo-install-update`, `cargo-install-update-config` | Update Cargo-installed applications; `cargo install-update -a` performs updates |
 | [csvlens](https://github.com/YS-L/csvlens) · 0.15.1 | `csvlens` | Browse and search CSV interactively; `csvlens data.csv` |
 | [du-dust](https://github.com/bootandy/dust) · 1.2.6 | `dust` | Readable directory-size overview; `dust .` |
 | [dua-cli](https://github.com/Byron/dua-cli) · 2.46.0 | `dua` | Explore disk usage interactively; `dua i` |
 | [eva](https://github.com/oppiliappan/eva) · 0.3.1 | `eva` | Calculator REPL; run `eva`, then enter expressions |
-| [exa](https://github.com/ogham/exa) · 0.10.1 | `exa` | Older enhanced file listing; `exa -la`; opt-in legacy entry |
+| [exa](https://github.com/ogham/exa) · 0.10.1 | `exa` | Older enhanced file listing, retained in the full setup; `exa -la` |
 | [git-cliff](https://git-cliff.org/docs/) · 2.14.2 | `git-cliff`, `git-cliff-completions`, `git-cliff-mangen` | Generate changelogs from Git history; `git cliff` previews output |
 | [htmlq](https://github.com/mgdm/htmlq) · 0.4.0 | `htmlq` | Query HTML with CSS selectors; `htmlq --text title < index.html` |
 | [jql](https://github.com/yamafaktory/jql) · 9.0.3 | `jql` | JSON querying with its own query language; `jql '"name"' data.json` |
@@ -59,7 +67,80 @@ Some tools perform changes after you select an operation: `dua i` and `xplr`
 include file operations; `linutil` can perform system tasks; Topgrade updates
 software. The shell configuration does not launch any of them automatically.
 
+## Debian tools by purpose
+
+The complete package list is
+[manifests/apt-packages.txt](../manifests/apt-packages.txt). These are some of the
+commands you will use most often after installation:
+
+| Purpose | Programs and first use |
+|---|---|
+| Terminal and shell | `kitty`, `kitten`, `zsh` |
+| Files and text | `l`, `bat README.md`, `fdfind filename`, `rg 'pattern' .` |
+| API requests and JSON | `http --help`, `jq '.items' response.json` |
+| Network and mounts | `ports`, `mylocalip`, `mnt` |
+| Containers | `docker --help`, `docker compose version` |
+| Sessions | `tmux new -s dev` |
+| GitHub | `gh --help`; the CLI still needs your own authentication |
+| Password store | `pass --help`; your GPG keys and store remain personal |
+| Kubernetes context | `kctx`, `kns`; your kubeconfig is not supplied |
+| Media | `yt-dlp --help`, `ffmpeg -version`, `vlc` |
+| Username research | `sherlock --help` |
+| Small terminal extras | `today_fortune`, `cowsay hello`, `toipe` |
+
+Language/build packages supply the system executables outside project overrides.
+Use `type -a java node npm python3 go rustc cargo` to inspect what your shell
+will execute, and use [mise](mise.md) when a particular project needs its own
+supported runtime version.
+
+The installer also prepares these upstream development CLIs when missing:
+
+| Program | Purpose | First use |
+|---|---|---|
+| [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) | Work with a Kubernetes cluster through your own kubeconfig | `kubectl version --client` |
+| [Helm](https://helm.sh/docs/intro/install/) | Manage Kubernetes applications packaged as charts | `helm help` |
+| [Google Repo](https://source.android.com/docs/setup/start/requirements#install-repo) | Coordinate projects made of multiple Git repositories | `repo version` |
+
+Existing working commands are kept. New copies go in `~/.local/bin`, with
+download verification handled by the development-tool installer. Installing
+the clients does not create a Kubernetes cluster or download an Android tree.
+
 ## Shell productivity
+
+### Find the aliases you actually have
+
+The selected `aliases` plugin is included in the personal setup:
+
+```zsh
+als
+als git
+als docker
+als kubectl
+```
+
+The output reflects aliases loaded in your live shell. `alias NAME` shows an
+exact definition; `type -a COMMAND` also reveals functions and executable paths.
+Source: [Oh My Zsh aliases](https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/aliases/README.md).
+
+### Small helpers already in the shell
+
+| Command | What it does |
+|---|---|
+| `gi Go Python` | Preview local ignore-file templates for a Go/Python project |
+| `gia Go Python` | Append those templates to the current `.gitignore`; review first |
+| `gie` | Open `.gitignore` in your editor |
+| `www 8000` | Serve the current directory at `http://localhost:8000`, bound to your own machine |
+| `tt` | Print the current Unix timestamp |
+| `tt 1700000000` | Convert a Unix timestamp to a local date/time |
+| `tt '2026-10-22 10:00:00'` | Convert a date/time to a Unix timestamp using your timezone |
+| `hacker_quote` | Display a quote from the installed local quote collection |
+| `today_fortune` | Show a fortune, using the installed box drawing helper |
+
+The selected gitignore implementation is the external
+[voronkovich plugin](https://github.com/voronkovich/gitignore.plugin.zsh), with
+its local template submodule. Names are separate arguments, and `gi` does not
+fetch a remote template on every use. Shell-specific helpers and their exact
+definitions are documented in [the shell guide](shell.md).
 
 ### Atuin: one history search owner
 
@@ -142,8 +223,9 @@ fdfind '\.go$'
 bat go.mod
 ```
 
-The Debian package supplies `fdfind`; use `fd` only if you have configured that
-name. `bat` is a shell alias to `batcat` when needed. Source:
+The Debian package supplies `fdfind`; the final setup step also creates an
+`fd` compatibility link when that command is absent. `bat` is a shell alias to
+`batcat` when needed. Source:
 [fd](https://github.com/sharkdp/fd), [bat](https://github.com/sharkdp/bat).
 
 ### Inspect an API response or report
@@ -232,17 +314,18 @@ sites; there is no pyenv wrapper. It is a separate tool from the unrelated
 ### exa, eza and lsd
 
 The inventory preserves `exa` 0.10.1. Its upstream says it is unmaintained and
-points to [eza](https://github.com/eza-community/eza). The core shell uses `lsd`;
-APT extras include `eza` for people who prefer it. You do not need all three.
-`exa` is included only with `--legacy`, and nothing automatically uninstalls it.
+points to [eza](https://github.com/eza-community/eza). The shell uses `lsd`;
+the complete setup also installs `eza` through APT and retains the recorded
+`exa` Cargo crate. The overlap is intentional: the personal collection includes
+all three, while the shell's default listing shortcut has one clear definition.
 Source: [exa's upstream status](https://github.com/ogham/exa).
 
 ### The Cargo btop entry
 
 Your snapshot says `btop v0.1.0` from Cargo. That name and version alone do not
 establish that it is the same implementation as the usual C++ btop resource
-monitor. The installer preserves the observed crate behind `--legacy`, rather
-than silently treating the two as interchangeable.
+monitor. The full installer includes this recorded crate. Its name should not
+be treated as proof that two independently packaged programs are interchangeable.
 
 For the conventional btop monitor, Debian provides
 [`btop`](https://packages.debian.org/sid/btop):
@@ -266,9 +349,9 @@ APT btop will not make it win over an existing Cargo `btop` binary. An explicit
 ### xsv
 
 [xsv's repository](https://github.com/BurntSushi/xsv) is archived. It remains in
-`--all` to preserve the owner's CSV workflow, with this status documented.
-Do not assume ongoing upstream fixes. Replacing it would be a separate choice,
-not an invisible alias in the shared shell config.
+the complete install to preserve the owner's CSV workflow, with this status
+documented. Do not assume ongoing upstream fixes. Any future replacement should
+be an explicit collection change so existing pipelines remain understandable.
 
 ## What is intentionally personal
 

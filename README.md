@@ -1,267 +1,244 @@
-# My Debian KDE development terminal
+# Erfan's terminal
 
-A documented Zsh, Kitty and Neovim setup for a Debian development workstation.
-Built around **Oh My Zsh + Powerlevel10k**, **Atuin**, **zoxide**, **fzf**,
-**navi**, and **mise with project-specific runtimes**.
+[![Configuration checks](https://github.com/Metal-Bat/my-zsh-config/actions/workflows/check.yml/badge.svg)](https://github.com/Metal-Bat/my-zsh-config/actions/workflows/check.yml)
 
-The goal is a terminal you can understand, reproduce and maintain. Each package
-has an installation owner, each integration has one job, and optional tools can
-be added gradually. The owner's workflow covers **Java, TypeScript, JavaScript,
-Python, Go and Rust**.
+**My Debian/KDE development setup, installed with one command.**
 
-## What you get
+Zsh · Oh My Zsh · Powerlevel10k · Kitty · LazyVim · mise · 27 Cargo utilities
 
-| Component | What it does | Configuration / guide |
-| --- | --- | --- |
-| Zsh + Oh My Zsh | Completion, useful aliases, suggestions and one syntax highlighter | [`.zshrc`](.zshrc) · [Shell guide](docs/shell.md) |
-| Powerlevel10k | Interactive prompt and locally generated prompt settings | [Shell guide](docs/shell.md) |
-| Atuin | Searchable shell history on **Ctrl-R** | [Tool guide](docs/tools.md) |
-| zoxide | Jump to frequently visited directories with `z` and `zi` | [Shell guide](docs/shell.md) |
-| fzf + navi | Fuzzy file selection and searchable command recipes | [Tool guide](docs/tools.md) |
-| mise | Global `usage`; language runtimes chosen in individual projects; Python disabled | [Exact config](config/mise/config.toml) · [mise guide](docs/mise.md) |
-| Kitty + kitten | MesloLGS NF, transparent background, rounded powerline tabs and cursor trails | [Config](config/kitty/kitty.conf) · [Kitty guide](docs/kitty.md) |
-| Neovim + LazyVim | `/opt/nvim-linux-x86_64` installation and an explained starter setup | [Neovim guide](docs/neovim.md) |
-| Developer utilities | APT package lists and the complete 27-package Cargo inventory | [Tool catalog](docs/tools.md) · [Manifests](manifests/) |
+This is the terminal setup I use for **Java, TypeScript, JavaScript, Python,
+Go, and Rust**. It includes the tools, shell plugins, fonts, shortcuts, editor
+bootstrap, and configuration that make up that environment. The code and the
+catalog explain what gets installed and how to use it.
 
-**Target:** Debian with KDE Plasma, primarily Linux x86_64. The package lists
-reflect the owner's Debian Sid environment; availability varies by release.
-The scripts check local APT candidates instead of adding another distribution's
-repositories. A working Debian installation is assumed; optional desktop and
-container setup is in [the installation guide](docs/installation.md).
+## Install
 
-## Start here
-
-- **New installation:** follow the numbered steps below.
-- **Already using these tools:** review the configuration diff, then use step 5.
-- **Want to understand a command?** Open the [tool catalog](docs/tools.md).
-- **Want more developer plugins?** Read the [optional recommendations](docs/plugin-recommendations.md).
-- **Something behaves differently?** Use [diagnostics and recovery](docs/maintenance.md).
-
-All four installers **preview by default**. `--apply` runs the displayed
-operation. Run them as your normal account; only the APT installer invokes
-`sudo` when needed. Packages, plugins and configuration copies are separate
-steps so you can see exactly what changes.
-
-### 1. Get the repository
+Clone the repository, enter it, and run the installer as your normal account:
 
 ```bash
-sudo apt update
-sudo apt install git curl ca-certificates
-mkdir -p "$HOME/src"
-git clone https://github.com/Metal-Bat/my-zsh-config.git "$HOME/src/my-zsh-config"
-cd "$HOME/src/my-zsh-config"
-```
-
-For an existing checkout, use that checkout instead of cloning over it. When
-reviewing an unmerged pull request, check out its branch first.
-
-### 2. Install the Debian packages
-
-```bash
-./scripts/install-apt.sh
-./scripts/install-apt.sh --apply
-```
-
-The [core list](manifests/apt-core.txt) includes Zsh, Kitty, zoxide, fzf, lsd,
-bat, ripgrep, build dependencies, **Sherlock and yt-dlp from APT**, and FFmpeg
-for downloader post-processing. It does not install Python applications through
-pyenv, pip or Cargo.
-
-Optional workstation tools include Go, HTTPie, tmux, Ansible, kubectx and the
-fortune/cowsay utilities:
-
-```bash
-./scripts/install-apt.sh --extras
-./scripts/install-apt.sh --extras --apply
-```
-
-If a package has no candidate, the script reports all missing packages and
-stops before the install transaction. See [release differences](docs/installation.md#debian-package-availability).
-
-### 3. Install Oh My Zsh and the shell plugins
-
-```bash
-./scripts/install-plugins.sh
-./scripts/install-plugins.sh --apply
-```
-
-This installs Oh My Zsh, Powerlevel10k, autosuggestions, history substring
-search, alias hints, terminal color support and fast syntax highlighting.
-It also installs the original `zpm-zsh/colorize` command-coloring plugin with
-its required `zpm-zsh/colors` dependency; the shell loads that dependency first.
-Existing directories are kept. It does not replace `.zshrc` or change your
-login shell.
-
-For the additional Docker, Git Flow and SSH helpers from the owner's setup:
-
-```bash
-./scripts/install-plugins.sh --extras --apply
-```
-
-The [plugin manifest](manifests/plugins.txt) gives every repository its correct
-installation directory; names such as `zsh-you-should-use` must be installed as
-`you-should-use` for the selected OMZ plugin name to match.
-
-### 4. Install mise, Rust and the desired Cargo tools
-
-Skip installers for tools already present. These are the official standalone
-bootstrap commands; their upstream behavior is described in the
-[mise guide](docs/mise.md) and [installation guide](docs/installation.md).
-
-```bash
-curl -fsSL https://mise.run | sh
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --no-modify-path
-```
-
-The supplied Zsh config adds the relevant executable directories. The Cargo
-installer also finds a new Rust installation before you restart the shell:
-
-```bash
-./scripts/install-cargo.sh
-./scripts/install-cargo.sh --apply
-```
-
-The default Cargo selection is `atuin`, `navi`, `tlrc` (the `tldr` command) and
-`tree-sitter-cli`. To include the standalone development utilities:
-
-```bash
-./scripts/install-cargo.sh --all
-./scripts/install-cargo.sh --all --apply
-```
-
-Use `--snapshot` to request the versions you see in the
-[recorded inventory](manifests/cargo-tools.txt). Without it, the script requests
-current releases. RTK is installed from `rtk-ai/rtk`, with the exact recorded
-commit used in snapshot mode. `--legacy` separately opts into `exa` and the
-recorded Cargo `btop` crate; read their [notes](docs/tools.md#overlapping-and-older-tools)
-first. Nothing removes your currently installed tools.
-
-### 5. Install the three configuration files
-
-Review the preview and, on an existing machine, compare your local config first:
-
-```bash
-diff -u "$HOME/.zshrc" .zshrc
+git clone https://github.com/Metal-Bat/my-zsh-config.git
+cd my-zsh-config
 ./install.sh
-./install.sh --apply
 ```
 
-`diff` returns status 1 when files differ; that is normal. On a new account,
-skip it if `.zshrc` does not exist.
+**`./install.sh` performs the full installation.** It installs the complete
+package and plugin collection, all 27 recorded Cargo tools, mise, the Rust
+bootstrap when needed, Neovim/LazyVim, MesloLGS NF, and the shared configs.
+It also sets Zsh as your login shell and configures the Debian Docker service
+and your account's Docker group membership. Privileged steps use `sudo`;
+run the script without `sudo` so user tools and dotfiles belong to your account.
 
-| Repository file | Default destination |
-| --- | --- |
-| `.zshrc` | `~/.zshrc` (or `$ZDOTDIR/.zshrc`) |
-| `config/mise/config.toml` | `~/.config/mise/config.toml` |
-| `config/kitty/kitty.conf` | `~/.config/kitty/kitty.conf` |
+The terminal shows a ten-stage progress bar, an animated activity indicator,
+and the current download or build. The percentage counts completed stages;
+long Cargo builds can stay on one stage for a while. Detailed output is saved in
+`~/.local/state/my-zsh-config/install-logs/` (or your `XDG_STATE_HOME` equivalent).
+Cargo builds and editor downloads can take a while. If a stage fails, the
+installer reports it and its log; follow [diagnosis and recovery](docs/maintenance.md).
 
-`XDG_CONFIG_HOME` and `XDG_STATE_HOME` are respected. Changed files and existing
-symlinks are moved into a timestamped backup with a destination map under
-`~/.local/state/my-zsh-config/backups/`. Identical regular files are skipped.
-Each replacement is prepared before it is moved into place; this is not a
-single transaction across all three files. Recovery is documented
-[in the maintenance guide](docs/maintenance.md#restore-a-configuration-backup).
+**Target:** an existing **Debian 13 or Sid workstation on Linux x86_64**, with a
+working network and `sudo`. The package names reflect my Debian Sid setup.
+This installs the terminal/development stack; it does not reinstall Debian or
+KDE, change your APT repositories, or configure your private accounts.
 
-**Copies are intentional.** Kitty's theme/font tools can edit its local config,
-and local edits should not unexpectedly modify your Git checkout. To deploy
-only one component, use `./install.sh --only zsh --apply` (also `mise` or `kitty`).
+After installation, **log out and back in** for the login-shell and group
+changes. Open Kitty and start exploring. Docker group membership gives your
+account root-level control through Docker; that access is part of this
+personal workstation setup. [Docker documents that permission model here.](https://docs.docker.com/engine/install/linux-postinstall/)
 
-Your existing `~/.p10k.zsh`, Kitty `current-theme.conf`, private overrides and
-Neovim configuration are preserved. Add personal shell settings using
-[the local override example](config/zsh/local.zsh.example).
+## What makes the setup useful
 
-### 6. Finish the first-run setup
+| Part | What you get | Learn more |
+|---|---|---|
+| **Zsh + Oh My Zsh** | Completion, useful aliases, Vi editing, suggestions, history navigation, and syntax highlighting | [Shell guide](docs/shell.md) |
+| **Powerlevel10k** | A configurable prompt with your local prompt settings preserved | [Prompt setup](docs/shell.md) |
+| **Atuin** | Search commands with context on **Ctrl-R** | [History workflow](docs/tools.md#atuin-one-history-search-owner) |
+| **zoxide** | Jump to familiar directories with `z` or select one with `zi` | [Navigation](docs/tools.md#zoxide-visit-once-jump-later) |
+| **fzf + navi + Television** | Pick files, search command recipes, and browse fuzzy-finder channels | [Tool catalog](docs/tools.md) |
+| **mise** | Project-specific runtimes; only `usage` is global; Python stays outside mise | [Exact behavior](docs/mise.md) |
+| **Kitty + kitten** | MesloLGS NF, 85% opacity, rounded powerline tabs, cursor trails, image and diff helpers | [Kitty guide](docs/kitty.md) |
+| **Neovim + LazyVim** | Neovim under `/opt/nvim-linux-x86_64`, with a starter for a new setup | [Editor guide](docs/neovim.md) |
+| **APT tools** | Sherlock, yt-dlp, Docker, language/build dependencies, CLI utilities, and the other recorded Debian tools | [Install inventory](manifests/apt-packages.txt) |
+| **Cargo tools** | All 27 tools from my recorded inventory, including the less obvious crate-to-command names | [Full catalog](docs/tools.md#complete-cargo-inventory) |
 
-Open a new Zsh session:
+The installer keeps existing Cargo installations and installs missing crates
+from their current releases. The recorded version column is a reference to my
+original inventory, not a forced downgrade. RTK comes from its upstream Git
+repository. [Installation details](docs/installation.md) explain ownership,
+version behavior, destinations, and system changes.
 
-```bash
-exec zsh
-```
+## Your first ten minutes
 
-Then run these in the new shell:
+### Find, jump, and discover
+
+| Want to… | Try |
+|---|---|
+| Find a command you ran before | **Ctrl-R** |
+| Search history matching what you have started typing | **Up / Down** |
+| Jump to a project you have visited | `z project-name` |
+| Choose a remembered directory | `zi` |
+| Insert a file path | **Ctrl-T** |
+| Pick a directory from the filesystem | **Alt-C** |
+| Find a reusable command recipe | **Ctrl-Space** or **Ctrl-G** |
+| Discover the aliases in this shell | `als`; `als docker`; `als git` |
+| Read short command examples | `tldr tar`; `tldr cargo` |
+
+The shell uses **Vi editing**: Escape enters command mode; `i` returns to
+insertion. The [keybinding guide](docs/shell.md#keyboard-shortcuts) explains how
+history search and the interactive pickers fit those modes.
+
+### Explore a project
 
 ```zsh
-cd "$HOME"
-mise install usage
-mise ls --current
-p10k configure
-"$HOME/src/my-zsh-config/scripts/doctor.sh"
+l
+tre .
+tokei .
+rg --line-number 'TODO|FIXME' .
+bat README.md
+nvim
 ```
 
-Install MesloLGS NF and choose a Kitty theme using the [Kitty guide](docs/kitty.md).
-Install or verify Neovim and LazyVim using the [Neovim guide](docs/neovim.md).
-The original Kitty color file and the owner's personal LazyVim files were not
-part of this snapshot, so those guides explain how to choose a theme and set
-up the upstream starter.
+`l` is the detailed `lsd` view. `tre` shows directories, `tokei` counts code,
+`rg` searches text, and `bat` reads it with highlighting. In Neovim, use
+**`:LazyExtras`** to explore editor features. Your existing personal LazyVim
+configuration is preserved; a fresh account receives the documented starter.
 
-To make Zsh your login shell, once you are happy with it:
+### Inspect a machine or a report
 
-```bash
-chsh -s "$(command -v zsh)"
+```zsh
+btm
+dust .
+dua i
+csvlens report.csv
+xsv headers report.csv
 ```
 
-Log out and back in. `exec zsh` changes the current terminal immediately; `chsh`
-changes the login default.
+The programs are installed by the main installer. Replace example filenames
+with your own. The [catalog](docs/tools.md) explains every utility, including
+network inspection, JSON/HTML queries, changelogs, downloading, and maintenance.
 
-### 7. Try the daily workflow
+### Use Kitty's built-in helpers
 
-| Need | Try |
-| --- | --- |
-| Find an earlier command | **Ctrl-R** for Atuin |
-| Jump to a familiar project | `z project-name`; `zi` for interactive selection |
-| Find a file | **Ctrl-T**; `rg 'pattern' .`; `fdfind filename` |
-| Find a command recipe | **Ctrl-Space** or **Ctrl-G** for navi |
-| Inspect files | `l`; `bat filename`; `tre .` |
-| Check disk or processes | `dust .`; `dua i`; `btm` |
-| Inspect CSV | `csvlens data.csv`; `xsv headers data.csv` |
-| Read concise command examples | `tldr tar` |
-| Open the editor | `nvim`; then `:LazyExtras` for curated features |
-| Choose a project runtime | Follow the [explicit project setup](docs/mise.md#3-choose-a-project-deliberately) |
-| Inspect the environment | `type -a python3 node go`; `mise ls --current` |
+```zsh
+kitten themes
+kitten choose-fonts
+kitten diff before.txt after.txt
+kitten icat picture.png
+```
 
-Tools in the full Cargo selection will be unavailable until you install them.
-See the catalog for what each command changes and which package provides it.
+The font files are installed for you. Theme and font selection are personal
+customization commands. **Ctrl+Shift+T** creates a tab; **Ctrl+Shift+Enter**
+creates a pane; **Ctrl+Shift+L** cycles layouts.
 
-## How this differs from the earlier configuration
+## Runtime behavior: system by default, projects when chosen
 
-- pyenv initialization and absolute aliases into old pyenv environments are removed.
-- mise is activated once; the OMZ `mise` plugin is not also loaded.
-- Global mise manages only `usage`; `disable_tools = ["python"]` is retained.
-- Cargo/local executable directories are ready before tool integrations run.
-- `/opt/nvim-linux-x86_64/bin` takes priority when that Neovim exists.
-- Atuin owns Ctrl-R, zoxide owns `z`, and one highlighter loads after the widgets.
-- Missing optional tools and plugin files are guarded so a partial install can start.
-- Sherlock and yt-dlp use normal APT executables; `yd` is a convenience alias for `yt-dlp`.
-- Personal application launchers and machine-specific shell code belong in local overrides.
-- Plugins update explicitly; shell startup does not run package installation scripts.
+The global mise configuration is deliberately small:
 
-## Repository map
+```toml
+[tools]
+usage = "latest"
 
-| Location | Role |
-| --- | --- |
-| `.zshrc` | Commented shell configuration, kept in one readable file |
-| `config/` | mise, Kitty and private-override examples |
-| `manifests/` | Explicit APT, Cargo and third-party plugin inventories |
-| `scripts/` | Package/plugin installers and read-only diagnostics |
-| `install.sh` | Preview, back up and copy the three configs |
-| `docs/` | Detailed setup, usage, recommendations and recovery |
-| `tests/smoke.sh` | Isolated startup and installer regression checks |
-| `.github/workflows/check.yml` | Runs the checks for pushes and pull requests |
+[settings]
+not_found_system_fallback = true
+disable_tools = ["python"]
+activate_shims = false
+not_found_auto_install = false
 
-## Keep it healthy
+[settings.self_update]
+auto = true
+```
+
+There are no global mise language versions. Your normal system tools remain
+available outside configured projects. Declare a runtime in a project's mise
+configuration when that project needs one. Python is disabled in mise; use
+system Python and explicitly activated virtual environments. An inherited
+virtual environment remains active until you deactivate it.
+
+The [mise guide](docs/mise.md) explains the important limitation:
+`activate_shims = false` does not disable normal project PATH activation.
+It also shows how to diagnose stale pyenv, NVM, or PlatformIO paths inherited
+from another startup file.
+
+## Included plugins, with their overlaps handled
+
+The installed collection follows my supplied plugin list, including `aliases`,
+`emoji-clock`, `gh`, `gitignore`, `lol`, `pass`, `repo`, `ssh-agent`, `tmux`,
+`tt`, `vi-mode`, and the older external helpers. The
+[plugin manifest](manifests/plugins.txt) records the third-party repositories;
+[the shell guide](docs/shell.md) explains which integrations run and why some
+redundant wrappers are kept installed without being loaded.
+
+Atuin owns Ctrl-R, zoxide owns `z`, mise is initialized once, and one syntax
+highlighter runs after the widgets. The collected plugins do not all compete
+for those same jobs.
+
+The original **`zpm-zsh/colorize` needs `zpm-zsh/colors`**. Both are installed,
+and the dependency loads first. This fixes the missing dependency behind the
+`bad math expression: illegal character: ^[` failure. See
+[colorize and its dependency](docs/shell.md#colorize-and-its-dependency).
+
+Want to expand the setup later? [Future plugin ideas](docs/plugin-recommendations.md)
+mark what is already included and explain other choices for the languages I
+use. Unselected suggestions are not silently added to the installer.
+
+## Files you may want to personalize
+
+| File | What belongs there |
+|---|---|
+| `~/.config/zsh/local.zsh` | Personal aliases, environment values, and machine paths |
+| `~/.config/zsh/plugins.zsh` | Additional plugin names and options needed before OMZ starts |
+| `~/.p10k.zsh` | Prompt design; use `p10k configure` |
+| `~/.config/kitty/current-theme.conf` | Your selected Kitty colors |
+| `~/.config/kitty/local.conf` | Local Kitty overrides |
+| `~/.config/nvim/` | Your actual LazyVim customization |
+
+XDG directory overrides are respected where documented. Existing prompt,
+theme, and editor configuration files are preserved. The original theme and
+personal LazyVim files were not supplied with the source configs, so a fresh
+installation provides a documented starting point rather than claiming to
+reproduce an unseen theme or editor configuration.
+
+The shared Zsh, mise, and Kitty configs are installed as **copies**, with
+changed destinations backed up. Kitty's customization commands can then edit
+its local copy without modifying your checkout. Backup locations and recovery
+steps are in [maintenance](docs/maintenance.md#restore-a-configuration-backup).
+
+## Read the setup from the code
+
+| Location | What to inspect |
+|---|---|
+| [`install.sh`](install.sh) | The complete installation flow and stage ordering |
+| [`manifests/apt-packages.txt`](manifests/apt-packages.txt) | Every APT package requested |
+| [`manifests/cargo-tools.txt`](manifests/cargo-tools.txt) | All 27 crates, observed versions, and executable names |
+| [`manifests/plugins.txt`](manifests/plugins.txt) | Third-party plugin sources and install directories |
+| [`.zshrc`](.zshrc) | PATH, plugin loading, aliases, widgets, and local overrides |
+| [`config/`](config/) | mise, Kitty, and customization examples |
+| [`scripts/`](scripts/) | The component installers, config deployment, and doctor |
+| [`docs/`](docs/) | Installation details, daily usage, maintenance, and future ideas |
+| [`tests/smoke.sh`](tests/smoke.sh) | Isolated shell/installer regression checks |
+
+The helper names follow their jobs: `install-apt.sh`, `install-runtimes.sh`,
+`install-cargo.sh`, `install-dev-tools.sh`, `install-plugins.sh`,
+`install-fonts.sh`, `install-neovim.sh`, and `install-config.sh` prepare the
+components; `finish-setup.sh` handles the prompt preset and account/service
+setup. The main installer coordinates them, so a new installation uses the
+single command above.
+
+## Maintenance
 
 ```bash
 git pull --ff-only
 ./install.sh
 ./scripts/doctor.sh
-bash tests/smoke.sh
 ```
 
-After inspecting a changed config, apply the selected component. Package updates
-remain with the package manager that installed each tool. Read
-[maintenance](docs/maintenance.md) before using a broad updater such as Topgrade.
+Re-running the installer completes missing setup and deploys current shared
+configs with backups. Routine software updates still belong to each tool's
+package manager; see the [maintenance table](docs/maintenance.md#update-by-owner).
+For a config-only maintenance operation, use
+`./scripts/install-config.sh --apply`.
 
-This is a tested configuration baseline, not a claim that every terminal,
-distribution package version or optional plugin combination behaves identically.
-The checks cover the repository's shell and installer behavior; an actual KDE
-session is still needed to assess fonts, transparency and interactive UI.
+The repository checks exercise shell loading and installer behavior in
+controlled environments. They do not establish that every Cargo build,
+network download, editor plugin, and KDE graphical feature works on every
+machine. Use the installer logs, the doctor, and the application health checks
+on the target workstation.

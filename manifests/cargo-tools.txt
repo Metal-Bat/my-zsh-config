@@ -1,7 +1,7 @@
 # profile|crate|observed-version|executables (comma separated)
 # Versions are the owner's 2026-10-22 snapshot, not an automatic lockfile.
-# core = shell/editor integrations; extra = standalone tools.
-# legacy = explicit opt-in; see docs/tools.md for exa and btop provenance.
+# Labels explain the collection; every row is installed by default.
+# legacy identifies exa and btop provenance; see docs/tools.md.
 core|atuin|18.24.1|atuin
 extra|bandwhich|0.23.1|bandwhich
 extra|bottom|0.14.9|btm

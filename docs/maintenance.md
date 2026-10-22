@@ -1,155 +1,219 @@
-# Maintenance, diagnosis and recovery
+# Maintenance, diagnosis, and recovery
 
-Run commands from the repository checkout unless an absolute path is shown.
-Keep one package manager responsible for each executable.
+[Back to the README](../README.md)
+
+Run commands from the repository checkout unless another path is shown. The
+main installer is `./install.sh`; it applies the complete setup and can be run
+again after a failed stage is fixed. Routine updates remain with the component
+that owns each program.
 
 ## Update by owner
 
 | Component | Routine update |
-| --- | --- |
-| Debian packages, Sherlock and yt-dlp | `sudo apt update`, review available changes, then `sudo apt upgrade` |
-| Dotfiles checkout | `git pull --ff-only`, inspect the diff, preview `./install.sh`, then apply the chosen config |
-| Oh My Zsh and managed external plugins | `./scripts/install-plugins.sh --extras --update`, then add `--apply` |
-| Standalone mise | Supplied self-update setting; explicit `mise self-update` also exists |
+|---|---|
+| Debian programs, Sherlock, yt-dlp, Docker, and language packages | `sudo apt update`, review changes, then `sudo apt upgrade` |
+| Repository and complete setup | `git pull --ff-only`, review the changes, then `./install.sh` |
+| Shared configs only | `./scripts/install-config.sh` previews; `./scripts/install-config.sh --apply` deploys with backups |
+| Oh My Zsh and managed external plugins | `./scripts/install-plugins.sh --update`, then add `--apply` |
+| `colors` / `colorize` dependency pair | Keep both managed checkouts and the current Zsh load order; repair instructions below |
+| Standalone mise | Its configured self-update feature; `mise self-update` for a deliberate update |
 | Global `usage` | `mise upgrade usage` from home |
-| Project tools | Review that project's configuration and update deliberately within it |
+| Project tools | Review that project's config and update within it |
 | Rust toolchains | `rustup update` |
-| Cargo utilities | `cargo install-update -a` when `cargo-update` is installed |
-| Git-sourced RTK | Re-run its explicit Git installation command to choose the intended branch or commit |
-| Neovim archive | Follow the staged replacement and backup procedure in [neovim.md](neovim.md) |
-| LazyVim plugins | Open `:Lazy` and review updates; keep your `lazy-lock.json` in your own config repository |
+| Cargo applications | `cargo install-update -a` with the installed cargo-update utility |
+| Git-sourced RTK | Deliberately reinstall/update from the intended upstream Git branch or commit |
+| kubectl, Helm, and Repo | Inspect `type -a` first; maintain the existing installation through its owner, or follow the upstream release/verification process used by `install-dev-tools.sh` |
+| Neovim archive | Follow the replacement/backup procedure in [neovim.md](neovim.md) |
+| LazyVim and editor plugins | Review `:Lazy`; keep `lazy-lock.json` with your personal editor config |
 
-The full-auto-update OMZ plugin is not part of this setup. Updates are explicit
-so you can see failures and inspect changes. This does not disable a project's
-own updater if you independently configured one.
+The normal installer fills missing Cargo entries; it is not a request to
+force-upgrade or downgrade every already installed crate. `cargo install-update`
+is the separate application-update operation.
+
+The historical full-auto-update plugin is included in the installed collection
+but is not loaded at shell startup. Managed updates check the checkout's origin
+and local modifications before fast-forwarding. If a checkout is skipped, inspect
+its changes or fork deliberately; do not discard them just to make an updater
+succeed.
 
 ### Topgrade
 
-Topgrade is useful for reviewing many update sources together:
+The complete tool collection includes Topgrade. Review its proposal with:
 
 ```bash
 topgrade --dry-run
 ```
 
-Inspect the proposed commands and Topgrade's configuration before running
-`topgrade`. It can invoke several package managers and external programs; it is
-not run by `.zshrc`, and it is not a replacement for knowing which manager owns
-a particular binary. See [upstream configuration](https://github.com/topgrade-rs/topgrade).
+Then use `topgrade` when you want that set of updates. It can invoke many package
+managers and applications, so its configuration determines what runs. It is not
+started by `.zshrc`. See [upstream configuration](https://github.com/topgrade-rs/topgrade).
 
-## Start with read-only diagnostics
+## An installation stage failed
+
+Read the error and log path printed by the installer. Per-run logs live under:
+
+```text
+${XDG_STATE_HOME:-$HOME/.local/state}/my-zsh-config/install-logs/TIMESTAMP-PID/
+```
+
+List the log files from a working shell:
+
+```bash
+rg --files "${XDG_STATE_HOME:-$HOME/.local/state}/my-zsh-config/install-logs"
+```
+
+Open the relevant file with `less` or `batcat`. Resolve the specific failure,
+then run `./install.sh` again. Successful earlier package/service operations
+remain in place; the installer is not a whole-system rollback mechanism.
+
+| Failure | Useful next check |
+|---|---|
+| APT package has no candidate | `apt-cache policy PACKAGE`; check your Debian release and existing sources |
+| APT reports broken dependencies | Resolve that APT error before retrying the stack installation |
+| Cargo compilation fails | Read the named crate's compiler/library error; check `rustc --version` |
+| A download or clone fails | Check the URL/error and network; retry after resolving connectivity |
+| A Git checkout is preserved/skipped | Inspect its origin and `git status` before choosing to update it |
+| Font/editor stage fails | Read its stage log, then use the corresponding [Kitty](kitty.md) or [Neovim](neovim.md) guide |
+| Docker permissions still fail after setup | Log out and back in; inspect `id` and the Docker service |
+
+The main `./install.sh --dry-run` option is available when you want to inspect
+planned work. Component helpers also expose `--help` for a targeted diagnosis.
+
+## Read-only diagnostics
 
 ```bash
 ./scripts/doctor.sh
 ```
 
-It checks command paths, required shell syntax, installed configs, expected
-plugin directories, likely stale version-manager paths, the `/opt` Neovim
-selection and MesloLGS NF. Missing optional tools produce warnings. Missing
-Zsh/Git or invalid repository shell syntax produce failure status. The report
-does not source your personal config or run package/network operations.
+The doctor reports command paths, shell syntax, installed configs, plugin
+locations, likely stale runtime-manager paths, Neovim selection, and font
+availability. Read its status messages and exit code; it is a diagnosis tool,
+not another installer.
 
 For the live interactive shell:
 
 ```zsh
 type -a python python3 node npm java go rustc cargo nvim mise
 printf 'VIRTUAL_ENV=%s\n' "${VIRTUAL_ENV-}"
-printf '%s\n' "${path[@]}"
+print -rl -- $path
 mise config ls
 mise ls --current
 mise doctor
-bindkey '^R'
-bindkey '^ '
+bindkey -M viins '^R'
+bindkey -M viins '^ '
 ```
 
-`python` need not exist on Debian; check `python3`. A missing command in `type -a`
-is diagnostic output, not proof that the rest of the setup failed.
+`python` need not exist on Debian; inspect `python3`. A missing entry in `type -a`
+is diagnostic output, not evidence that every other part of the setup failed.
 
 ## Troubleshooting
 
 | Symptom | Check and fix |
-| --- | --- |
-| Shell starts but uses a plain prompt | Confirm Oh My Zsh and Powerlevel10k paths; run the plugin installer, open a new terminal, run `p10k configure` |
-| Old pyenv or NVM still wins | Inspect startup files and inherited `PATH`; remove the obsolete initialization you identify, then start a clean login session |
-| PlatformIO Python wins | Inspect where `penv/bin` enters `PATH`; keep PlatformIO's own environment intact; see [mise diagnosis](mise.md#5-diagnose-the-command-that-actually-runs) |
-| Runtime changes outside the intended project | Check `mise config ls` and its source paths; remove runtime declarations from a global or broad parent config |
-| Correct project config, missing runtime | Run `mise install` there; typing a missing command does not auto-install it |
-| Ctrl-R opens the wrong history UI | Use a new shell; `bindkey '^R'` should show Atuin when installed; remove personal duplicate history bindings |
-| Ctrl-Space is intercepted | Use navi's Ctrl-G binding, or choose another binding in `local.zsh` |
-| A plugin name is missing | Compare `manifests/plugins.txt`, its directory name and the `.plugin.zsh` file; install the intended plugin |
-| Custom `colorize` reports `bad math expression: illegal character: ^[` | The old `zpm-zsh/colorize` install needs `zpm-zsh/colors` loaded first. Run `./scripts/install-plugins.sh --apply`, deploy the updated Zsh config with `./install.sh --only zsh --apply`, then start a fresh shell. See [colorize dependencies](shell.md#colorize-and-its-dependency). |
-| `bat` works in shell but an editor cannot find it | A Zsh alias is not an executable; configure the editor to use `batcat` or provide an intentional user-local wrapper |
-| `/usr/bin/nvim` wins over `/opt` | Verify `/opt/nvim-linux-x86_64/bin/nvim` exists and is executable; restart and run `type -a nvim` |
-| Missing icons / square boxes | Install all MesloLGS NF faces; confirm Kitty font selection and Nerd Font compatibility |
-| Kitty colors differ | The theme is local; run `kitten themes` or supply your own `current-theme.conf` |
-| “Found existing alias …” messages | That is `you-should-use` giving alias hints; see the disable example in [shell.md](shell.md) |
-| Cargo build fails | Read the failing crate's compiler/library requirement; update rustup or add its documented development library; the installer names failures |
-| APT script says a package is unavailable | Inspect `apt-cache policy`; use packages appropriate to your Debian release |
+|---|---|
+| Plain prompt | Check the Oh My Zsh/Powerlevel10k paths; start a fresh Zsh; use `p10k configure` |
+| Old pyenv or NVM still wins | Inspect inherited PATH and startup files; remove the obsolete initialization you identify |
+| PlatformIO Python wins | Find where `penv/bin` entered PATH; preserve PlatformIO's own environment; see [mise diagnosis](mise.md) |
+| Runtime changes outside the selected project | Inspect `mise config ls`; check global and parent-directory declarations |
+| Project runtime is missing | Run `mise install` in that project; command-not-found does not auto-install it |
+| Ctrl-R opens the wrong UI | Start a new shell; check the binding in `viins`/`vicmd`; remove duplicate personal bindings |
+| Ctrl-Space is intercepted | Use Navi's Ctrl-G shortcut or customize a binding in `local.zsh` |
+| A plugin appears missing | Compare its manifest directory and `.plugin.zsh` filename; check the shell guide's load policy |
+| `colorize` prints `bad math expression: illegal character: ^[` | Install its `zpm-zsh/colors` dependency and deploy the current Zsh config as described below |
+| `tldr` opens a pager | Check whether an old `lol` alias remains in this shell; use a fresh session with the current config |
+| `tt` fails with date options | The current config supplies a GNU-date implementation for Debian; inspect `type tt` and start a fresh shell |
+| `bat` works in Zsh but an editor cannot execute it | Shell aliases are not binaries; configure that program for `batcat` or a deliberate executable wrapper |
+| `/usr/bin/nvim` wins | Confirm `/opt/nvim-linux-x86_64/bin/nvim` exists, then inspect `type -a nvim` |
+| Missing prompt/editor icons | Confirm MesloLGS NF is installed and selected in Kitty |
+| Kitty colors differ from another machine | Choose a theme or provide your own `current-theme.conf`; the original palette was not supplied |
+| Alias reminder messages | `you-should-use` is offering shortcuts; see [shell customization](shell.md) |
+| GitHub, SSH, Kubernetes, or pass needs credentials | Supply your own account/key/config; the installer only prepares the tools |
 
-The quickest clean comparison is a fresh terminal. Repeatedly sourcing `.zshrc`
-inside the same session can leave hooks and aliases from the old config, even
-when the replacement is correct. Prefer `exec zsh` after deploying it. That
-still inherits the parent environment; log out/back in when diagnosing a PATH
-injected by the desktop session itself.
+### Repair the colorize dependency
+
+The original custom `zpm-zsh/colorize` requires `zpm-zsh/colors` loaded first.
+An older clone can exist while the dependency is missing. Repair both the
+checkout collection and the shell load order:
+
+```bash
+./scripts/install-plugins.sh --apply
+./scripts/install-config.sh --only zsh --apply
+exec zsh
+```
+
+The manifest contains both repositories. See
+[colorize and its dependency](shell.md#colorize-and-its-dependency) for the
+specific load behavior. This repair is retained from the directly published
+colorize fix.
+
+Prefer a fresh terminal or `exec zsh` to repeatedly sourcing `.zshrc`: an old
+session can retain functions, aliases, and widgets from a previous config.
+`exec zsh` still inherits its parent environment. Log out/back in when a desktop
+session injected a stale PATH, and after changing your login shell or groups.
 
 ## Restore a configuration backup
 
-The installer prints the exact backup directory it used. Backups default to:
+Configuration deployment prints its backup directory. By default it is below:
 
 ```text
 ~/.local/state/my-zsh-config/backups/TIMESTAMP-PID/
 ```
 
-Inside are only the destinations replaced in that run, named `zsh`, `mise`, and
-`kitty`. `restore-map.tsv` maps each backup name to its original destination.
-An absent backup means there was no previous file for that component.
-
-Inspect the directory before restoring:
+The directory contains the old destinations replaced in that run, named
+`zsh`, `mise`, and `kitty`. `restore-map.tsv` records their original paths.
+An absent component backup means that run had no previous file to preserve.
+Use the directory actually printed by your installation:
 
 ```bash
 backup_dir="$HOME/.local/state/my-zsh-config/backups/REPLACE-WITH-THE-PRINTED-DIRECTORY"
 cat "$backup_dir/restore-map.tsv"
 ```
 
-For a regular-file backup of Zsh, restore to the exact destination shown in the
-map (the default is shown here):
-
-```bash
-cp -a -- "$backup_dir/zsh" "$HOME/.zshrc"
-exec zsh
-```
-
-If the saved object is a symlink, preserve it as a symlink when restoring, and
-ensure its original target still exists. To avoid replacing a current local
-change without a copy, move the current destination to a new name first:
+For the default Zsh destination, first preserve your current copy, then restore
+the selected backup:
 
 ```bash
 mv -- "$HOME/.zshrc" "$HOME/.zshrc.before-restore.$(date -u +%Y%m%dT%H%M%SZ)"
 cp -a -- "$backup_dir/zsh" "$HOME/.zshrc"
+exec zsh
 ```
 
-Use the map's paths if you customized `ZDOTDIR` or XDG variables. Restoring one
-component does not require restoring the others. For a first install with no
-backup, move the new file aside to let the program use its defaults.
+Use the map's actual destination if `ZDOTDIR` or XDG locations differ. A saved
+symlink should be restored as a symlink, and its target must still exist.
+Restoring one component does not require restoring the others. With no previous
+backup, move the newly installed config aside to return to that program's
+default behavior.
 
-## Keep personal changes out of the shared config
+Restoring dotfiles does not uninstall APT/Cargo programs, change your account
+shell, remove Docker group access, or reverse service configuration. Those are
+separate operations with their own system tools.
 
-- Shell aliases, environment variables and machine paths: `~/.config/zsh/local.zsh`.
-- Additional OMZ plugin selections: `~/.config/zsh/plugins.zsh`.
-- Prompt design: `~/.p10k.zsh`, produced by `p10k configure`.
-- Kitty colors and local options: `~/.config/kitty/current-theme.conf` and `local.conf`.
-- Actual LazyVim customization: your own `~/.config/nvim`, preferably versioned separately.
+## Keep personal customization easy to preserve
 
-If you edit an installed copy directly, compare it before applying an updated
-repository version; the installer backs it up, but does not merge its contents.
+| Personal content | Location |
+|---|---|
+| Aliases, environment, and machine paths | `~/.config/zsh/local.zsh` |
+| Extra plugin selections/startup options | `~/.config/zsh/plugins.zsh` |
+| Prompt design | `~/.p10k.zsh` |
+| Kitty palette/local overrides | `~/.config/kitty/current-theme.conf` and `local.conf` |
+| LazyVim configuration | `~/.config/nvim`, preferably versioned in your own repo |
 
-## Repository checks
+Use your XDG equivalents where applicable. Compare direct edits to installed
+shared files before a future deployment: the installer backs up changed files,
+but it does not merge their contents. The local override paths keep those
+personal edits independent of shared updates.
+
+## Repository checks and practical verification
 
 ```bash
 bash tests/smoke.sh
 ```
 
-The test runner uses temporary homes and isolated config paths. It exercises
-startup without optional dependencies, configuration-copy safety, backups,
-idempotence and representative installer failure paths. GitHub Actions runs the
-same entry point. It does not install the full Cargo catalog or launch a KDE
-desktop; application-level integration should be checked on the target machine.
+The regression runner uses temporary homes and controlled command doubles to
+check shell loading, deployment/backups, idempotence, and installer behavior.
+Its exact assertions are visible in the test file. A passing local test does
+not demonstrate a completed live APT transaction, all 27 Cargo compilations,
+every download, or a graphical KDE session.
+
+On your workstation, follow installation with the doctor, `:LazyHealth` inside
+Neovim, a real project build, and a quick check of Kitty fonts/shortcuts. Those
+checks exercise the environment you will actually use.

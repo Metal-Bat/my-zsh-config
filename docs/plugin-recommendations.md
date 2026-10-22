@@ -1,36 +1,37 @@
-# Optional plugins for everyday development
+# Future plugins and developer tools
 
 [Back to the README](../README.md) · [Shell configuration](shell.md)
 
-These are suggestions for a Java, TypeScript, JavaScript, Python, Go, and Rust
-workflow on Debian/KDE. **They are not enabled or installed by this update.**
-Choose the ones you find useful, then add them yourself.
+The main installer already includes the plugin list from my setup, including
+`aliases` and the external `gitignore` plugin. This page explains those two
+useful additions, then collects ideas for a Java, TypeScript, JavaScript,
+Python, Go, and Rust workflow on Debian/KDE. **Future ideas are not enabled
+automatically.** Add the ones that fit your own projects after using the setup.
 
-For a first round, my picks are **`aliases`**, **`copybuffer`**, and
-**`auto-notify`**: learn the shortcuts you already have, copy a command while
-editing it, and receive a desktop notification when a long build finishes.
-If you want only plugins bundled with Oh My Zsh, choose `magic-enter` instead
-of `auto-notify`.
+My next three picks would be **`copybuffer`**, **`auto-notify`**, and **`rust`**:
+copy a command while editing it, receive a desktop notification after a long
+build, and complete Rust toolchain commands. If you want only plugins bundled
+with Oh My Zsh, `magic-enter` is another small convenience to try.
 
 ## At a glance
 
-| Pick | Where it helps | Try this after enabling it |
-|---|---|---|
-| `aliases` | Discover Git, Docker, Go, and Kubernetes shortcuts | `als docker` |
-| `copybuffer`, `copypath`, `copyfile` | Move commands, paths, and config text into another app | Ctrl+O; `copypath`; `copyfile compose.yaml` |
-| `magic-enter` | See repository status or directory contents quickly | Press Enter on an empty prompt |
-| `auto-notify` (external) | Know when builds/tests finish while using another window | Run a normally long `cargo build` or `go test ./...` |
-| `rust` | Complete Rust compiler and toolchain commands | Type `cargo `, then Tab |
-| `mvn` / `gradle` | Java completion and project-wrapper convenience | `mvnt`; `gradle test` |
-| `npm` | JS/TS project scripts and completion | `npmrd`; `npmrb`; `npmt` |
-| `python` | Explicit Python commands and virtual environments | `mkv .venv` to create/activate; `vrun .venv` to activate it later |
-| `gitignore` | Start a repository's ignore rules from known templates | `gi go,linux,vim` |
+| Pick | Status | Where it helps | Try this |
+|---|---|---|---|
+| `aliases` | Included | Discover Git, Docker, Go, and Kubernetes shortcuts | `als docker` |
+| `copybuffer`, `copypath`, `copyfile` | Future idea | Move commands, paths, and config text into another app | Ctrl+O; `copypath`; `copyfile compose.yaml` |
+| `magic-enter` | Future idea | See repository status or directory contents quickly | Press Enter on an empty prompt |
+| `auto-notify` (external) | Future idea | Know when builds/tests finish while using another window | Run a normally long `cargo build` or `go test ./...` |
+| `rust` | Future idea | Complete Rust compiler and toolchain commands | Type `cargo `, then Tab |
+| `mvn` / `gradle` | Future idea | Java completion and project-wrapper convenience | `mvnt`; `gradle test` |
+| `npm` | Future idea | JS/TS project scripts and completion | `npmrd`; `npmrb`; `npmt` |
+| `python` | Future idea | Explicit Python commands and virtual environments | `mkv .venv` to create/activate; `vrun .venv` to activate it later |
+| `gitignore` (external) | Included | Start a repository's ignore rules from local templates | `gi Go Python` |
 
 The existing configuration already includes `git`, `golang`, `docker`,
 `docker-compose`, `kubectl`, `helm`, and `jsontools`. Those remain the foundation;
 the suggestions above add different conveniences.
 
-## How to enable your choices
+## How to add a future choice
 
 This repository loads an optional file **before Oh My Zsh starts**:
 
@@ -49,7 +50,7 @@ nvim "${XDG_CONFIG_HOME:-$HOME/.config}/zsh/plugins.zsh"
 For example, to try just two bundled plugins, put this in the file:
 
 ```zsh
-MYZSH_EXTRA_PLUGINS=(aliases copybuffer)
+MYZSH_EXTRA_PLUGINS=(copybuffer copypath)
 ```
 
 Keep one array and add your chosen names to it. Names are separated by spaces,
@@ -57,13 +58,14 @@ with no commas. This adds to the repository's shared plugin list. A plugin that
 is not installed is skipped; `auto-notify` needs the separate clone below.
 
 Open a new terminal, or run `exec zsh`, after editing. Inspect loaded names with
-`print -rl -- $plugins`. Removing a name from your extra array and starting a
-fresh shell disables that optional plugin.
+`print -rl -- $plugins`. Removing a name introduced by your extra array and
+starting a fresh shell disables that addition. Removing a name from this array
+does not disable a plugin already included in the shared configuration.
 
 Put plugin options needed at startup in `plugins.zsh` too. Use `local.zsh` for
 aliases and keybindings you want to apply after the shared configuration.
 
-## 1. aliases: a searchable cheatsheet for your actual shell
+## 1. Included: aliases, a searchable cheatsheet for your actual shell
 
 You already load many useful shortcuts. This plugin makes them discoverable:
 
@@ -95,19 +97,9 @@ Enable any of these independently:
 | `copypath` | An absolute path | `copypath ./src/main.go`, or `copypath` for the current directory |
 | `copyfile` | A file's contents | `copyfile compose.yaml` |
 
-For KDE **Wayland**, install the clipboard helper:
-
-```bash
-sudo apt install wl-clipboard
-```
-
-For an **X11** session, install `xclip` instead:
-
-```bash
-sudo apt install xclip
-```
-
-`printf '%s\n' "$XDG_SESSION_TYPE"` usually identifies the session type.
+The main installer already supplies the clipboard helpers: `wl-clipboard` for
+KDE **Wayland** and `xclip` for **X11**. The plugin itself remains a future
+choice. `printf '%s\n' "$XDG_SESSION_TYPE"` usually identifies the session type.
 Oh My Zsh detects the available clipboard backend. Ctrl+O copies the edited
 buffer; it does not execute the command. These shortcuts do not take over
 Atuin's Ctrl+R or Navi's Ctrl+G/Ctrl+Space.
@@ -250,26 +242,31 @@ PYTHON_AUTO_VRUN=false
 Automatic activation is an optional feature of this plugin. Keeping it off
 fits this repository's explicit runtime choices. Activating `.venv` yourself
 temporarily selects that environment's Python; `deactivate` returns to the
-previous environment. Debian may require `sudo apt install python3-venv` to
-create environments.
+previous environment. The main installer supplies Debian's `python3-venv`
+package for creating these environments.
 
 Source: [Oh My Zsh python](https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/python/README.md).
 
-## 9. gitignore: starting templates for new repositories
+## 9. Included: gitignore, local templates for new repositories
 
-Use `gi list` to see supported templates, then request a combination:
+This setup uses **voronkovich/gitignore.plugin.zsh**, installed with its template
+submodule. Its templates are local, so generating a file does not need an
+online template service. Try Tab after `gi ` to complete a template name:
 
 ```zsh
-gi go,linux,vim
+gi Go Python
 ```
 
-Review the output before adding it to your project's `.gitignore`. Once you
-are happy with it, `gi go,linux,vim >> .gitignore` appends it without truncating
-existing rules. Running that append repeatedly duplicates the rules. The
-plugin uses `curl` to fetch templates from gitignore.io, so it needs a network
-connection. Generated rules are a starting point for your project's choices.
+`gi` prints the templates for review. Once you are happy with the result,
+`gia Go Python` appends those templates to the current project's `.gitignore`;
+`gie` opens the file in your configured editor. Repeated appends duplicate the
+rules, so review the file before adding another template. Template names are
+separate arguments here.
 
-Source: [Oh My Zsh gitignore](https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/gitignore/README.md).
+Templates update with the plugin and its submodule through the repository's
+plugin installer. Existing project rules remain your project's responsibility.
+
+Source: [gitignore.plugin.zsh](https://github.com/voronkovich/gitignore.plugin.zsh).
 
 ## Separate terminal programs worth considering
 

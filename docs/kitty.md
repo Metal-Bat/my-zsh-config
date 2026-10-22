@@ -11,11 +11,13 @@ the active settings in Erfan's uploaded file. The upload contained 3,314 lines
 of generated documentation and only 15 active settings; the smaller file keeps
 those choices readable. The separate color theme was not supplied.
 
-## 1. Install Kitty
+## 1. Open Kitty after setup
+
+The repository's `./install.sh` installs Kitty through APT, copies its config,
+and installs all four MesloLGS NF font faces for your account. After setup,
+check the installed programs:
 
 ```bash
-sudo apt update
-sudo apt install kitty fontconfig curl ca-certificates
 kitty --version
 kitten --version
 ```
@@ -30,7 +32,7 @@ terminal shortcuts to launch it. The exact settings label can vary by Plasma
 version. Hiding window decorations is part of the supplied config; set
 `hide_window_decorations no` in `local.conf` if you prefer the normal title bar.
 
-## 2. Install MesloLGS NF
+## 2. Verify MesloLGS NF
 
 The configuration requests **MesloLGS NF**. Its name must match the installed
 font family. These are the four official font files linked by
@@ -41,30 +43,18 @@ font family. These are the four official font files linked by
 - [Italic](https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Italic.ttf)
 - [Bold Italic](https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/MesloLGS%20NF%20Bold%20Italic.ttf)
 
-Download and install them for your user. Paste the complete block in Bash or
-Zsh; the block explicitly runs Bash. All downloads finish before installed
-fonts are changed.
+Setup downloads these files into
+`${XDG_DATA_HOME:-$HOME/.local/share}/fonts/MesloLGS-NF` and refreshes the
+font cache. It preserves existing valid faces, validates every new download
+with `fc-scan` before installing any of them, and backs up invalid files before
+replacing them. Font backups go under
+`${XDG_STATE_HOME:-$HOME/.local/state}/my-zsh-config/backups/fonts-*`.
+
+Check what Fontconfig resolves:
 
 ```bash
-bash <<'BASH'
-set -euo pipefail
-font_work=$(mktemp -d)
-trap 'rm -rf -- "$font_work"' EXIT
-font_dir="${XDG_DATA_HOME:-$HOME/.local/share}/fonts/MesloLGS-NF"
-font_base=https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master
-
-for face in Regular Bold Italic "Bold Italic"; do
-  encoded_face=${face// /%20}
-  curl --fail --location --retry 3 \
-    "$font_base/MesloLGS%20NF%20${encoded_face}.ttf" \
-    --output "$font_work/MesloLGS NF $face.ttf"
-done
-
-install -d -- "$font_dir"
-install -m 0644 -- "$font_work"/*.ttf "$font_dir/"
-fc-cache -f "$font_dir"
 fc-match "MesloLGS NF"
-BASH
+fc-list : family | rg 'MesloLGS NF'
 ```
 
 Open a new Kitty window, then run:
@@ -79,10 +69,10 @@ fonts already installed on your machine; it does not download missing fonts.
 If `fc-match` reports another family, check the downloaded files and rebuild
 the font cache before changing prompt settings.
 
-## 3. Install the config and select a theme
+## 3. Find the config and select a theme
 
-Follow the repository's [main installation steps](../README.md) to copy the
-config with a backup of any file it replaces. The usual destination is:
+The [main installer](../README.md) copies the config with a backup of any file
+it replaces. The usual destination is:
 
 ```text
 ~/.config/kitty/kitty.conf

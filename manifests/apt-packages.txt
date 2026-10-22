@@ -1,0 +1,70 @@
+# Erfan's complete Debian terminal/development profile. Every entry is installed.
+# Exact package names only. Use the system's configured Debian repositories.
+# Shell, search, terminal, and build dependencies
+bat
+build-essential
+ca-certificates
+cmake
+curl
+fd-find
+fontconfig
+fzf
+git
+grc
+gzip
+iproute2
+jq
+kitty
+libpcap-dev
+libssl-dev
+lsd
+man-db
+net-tools
+pkg-config
+procps
+ripgrep
+sqlite3
+tar
+unzip
+util-linux
+xz-utils
+zip
+zsh
+zoxide
+# System language toolchains; mise does not replace global Python
+default-jdk
+golang-go
+nodejs
+npm
+node-typescript
+python3
+python3-venv
+# Development, containers, SSH, and selected OMZ plugin dependencies
+ansible
+docker.io
+docker-cli
+docker-compose
+gh
+git-flow
+gnupg
+httpie
+kubectx
+openssh-client
+pass
+thefuck
+tmux
+wl-clipboard
+xclip
+# The rest of the personal workstation tools
+boxes
+cowsay
+eza
+ffmpeg
+fortune-mod
+fortunes-min
+htop
+lolcat
+sherlock
+vlc
+wget
+yt-dlp

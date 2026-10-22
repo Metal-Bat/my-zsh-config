@@ -1,4 +1,4 @@
-# profile|directory under ZSH_CUSTOM|repository
+# set|directory under ZSH_CUSTOM|repository (the complete set is always installed)
 # Directory names must match .zshrc; never infer them from repository basenames.
 core|themes/powerlevel10k|https://github.com/romkatv/powerlevel10k.git
 core|plugins/colors|https://github.com/zpm-zsh/colors.git
@@ -8,6 +8,17 @@ core|plugins/zsh-history-substring-search|https://github.com/zsh-users/zsh-histo
 core|plugins/you-should-use|https://github.com/MichaelAquilina/zsh-you-should-use.git
 core|plugins/fast-syntax-highlighting|https://github.com/zdharma-continuum/fast-syntax-highlighting.git
 core|plugins/zsh-256color|https://github.com/chrissicool/zsh-256color.git
-extra|plugins/docker-helpers|https://github.com/unixorn/docker-helpers.zshplugin.git
-extra|plugins/git-flow-completion|https://github.com/bobthecow/git-flow-completion.git
-extra|plugins/ssh-connect|https://github.com/gko/ssh-connect.git
+core|plugins/docker-helpers|https://github.com/unixorn/docker-helpers.zshplugin.git
+core|plugins/git-flow-completion|https://github.com/bobthecow/git-flow-completion.git
+core|plugins/ssh-connect|https://github.com/gko/ssh-connect.git
+core|plugins/gitignore|https://github.com/voronkovich/gitignore.plugin.zsh.git
+core|plugins/hacker-quotes|https://github.com/oldratlee/hacker-quotes.git
+core|plugins/yt-dlp|https://github.com/clavelm/yt-dlp-omz-plugin.git
+# Installed for the complete personal inventory; overlapping hooks stay inactive.
+core|plugins/ohmyzsh-full-autoupdate|https://github.com/Pilaton/OhMyZsh-full-autoupdate.git
+core|plugins/zsh-bat|https://github.com/fdellwing/zsh-bat.git
+core|plugins/zsh-lsd|https://github.com/wintermi/zsh-lsd.git
+core|plugins/zsh-fzf-history-search|https://github.com/joshskidmore/zsh-fzf-history-search.git
+core|plugins/zsh-histdb|https://github.com/larkery/zsh-histdb.git
+core|plugins/zsh-navi-plugin|https://github.com/icatalina/zsh-navi-plugin.git
+core|plugins/zsh-syntax-highlighting|https://github.com/zsh-users/zsh-syntax-highlighting.git

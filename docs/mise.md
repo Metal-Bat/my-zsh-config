@@ -20,41 +20,40 @@ Sources: [shell activation](https://mise.jdx.dev/shell-setup.html),
 [configuration hierarchy](https://mise.jdx.dev/configuration.html#configuration-hierarchy),
 and [settings reference](https://mise.jdx.dev/configuration/settings.html).
 
-## 1. Install mise once
+## 1. What setup installs
 
-For the supplied `self_update.auto` setting, use the standalone installation at
-`~/.local/bin/mise`. The official Linux installation command is:
+Run `./install.sh` from the cloned repository. It deploys the supplied mise
+configuration, installs missing mise from the official standalone installer at
+`https://mise.run`, and installs the `usage` helper. The new executable goes to
+`~/.local/bin/mise`; an existing working mise is preserved. No extra installation
+command or shell-activation line is needed.
 
-```bash
-curl -fsSL https://mise.run | sh
-"$HOME/.local/bin/mise" --version
-```
+The standalone build supports the supplied `self_update.auto` setting. Setup
+uses the plain installer rather than its `/zsh` variant, because this
+repository's `.zshrc` already activates mise once. The installer never appends
+another activation line.
 
-The repository's `.zshrc` already activates mise. Use the plain installer URL
-above: the `/zsh` variant also appends an activation line, which would duplicate
-the integration supplied here.
-
-If mise is already installed, check it before installing a second copy:
+Inspect the active installation with:
 
 ```zsh
 type -a mise
 ```
 
-APT is also supported through the upstream repository, enabled with `extrepo`:
+If your existing mise is APT-managed, keep using APT for its updates; package
+builds can disable self-update. Set `auto = false` in `[settings.self_update]`
+for that existing installation. Setup does not put a second mise ahead of a
+working one.
 
-```bash
-sudo apt install extrepo
-sudo extrepo enable mise
-sudo apt update
-sudo apt install mise
-```
+The full setup also installs Debian's Node.js/npm, Go, Java, Python, and Python
+venv support. Rust is separate: a fresh system gets the official **rustup minimal
+stable** toolchain and Cargo. Working system Cargo/Rust are preserved. Existing
+rustup installations gain missing `rust-src`, `rustfmt`, `clippy`, and
+`rust-analyzer` components on their active toolchain. These steps add no language
+runtime declaration to mise and do not install NVM or pyenv.
 
-Choose one installation method. For an APT-managed installation, use APT for
-updates; package builds can disable self-update. Set `auto = false` in
-`[settings.self_update]` if you deliberately choose that route. The standalone
-method matches the configuration in this repository.
-
-Source: [official installation and update instructions](https://mise.jdx.dev/installing-mise.html).
+Sources: [mise installation and updates](https://mise.jdx.dev/installing-mise.html),
+[rustup installation](https://rust-lang.github.io/rustup/installation/other.html),
+and the local [runtime installer](../scripts/install-runtimes.sh).
 
 ## 2. Use the supplied global configuration
 
@@ -87,13 +86,13 @@ auto = true
 
 Source: [current setting definitions](https://mise.jdx.dev/configuration/settings.html).
 
-Install the helper, then open a fresh terminal:
+Setup installs the helper. Open a fresh terminal and verify:
 
 ```zsh
 cd "$HOME"
-mise install usage
 mise config ls
 mise ls --current
+mise which usage
 ```
 
 With only this global configuration, the selected-tools list should contain
@@ -175,7 +174,6 @@ Python does not require pyenv for this configuration. For an ordinary Python
 project using Debian's Python, create a virtual environment explicitly:
 
 ```bash
-sudo apt install python3-venv
 cd /path/to/your/python-project
 /usr/bin/python3 -m venv .venv
 source .venv/bin/activate
@@ -183,7 +181,7 @@ python --version
 deactivate
 ```
 
-The explicit `/usr/bin/python3` selects Debian's interpreter when creating the
+Setup already installs `python3-venv`. The explicit `/usr/bin/python3` selects Debian's interpreter when creating the
 environment. Activating `.venv` intentionally changes command lookup until you
 deactivate it. Do not globally add `.venv/bin` or PlatformIO's `penv/bin` to
 `PATH`.
@@ -259,7 +257,8 @@ Sources: [Oh My Zsh's mise plugin](https://github.com/ohmyzsh/ohmyzsh/blob/maste
 | `[settings.self_update] auto = true` | Periodic mise self-update before eligible interactive commands. |
 | `mise upgrade usage` | Update the installed global completion helper within its `latest` request. |
 | `mise upgrade` in a project | Review and update tools selected by the applicable configuration. |
-| `sudo apt upgrade` | APT-managed packages, including mise if you chose APT. |
+| `rustup update` | Rust toolchains managed by rustup; review the resulting compiler version before rebuilding projects. |
+| `sudo apt upgrade` | APT-managed packages, including mise if your existing installation came from APT. |
 
 `latest` is a version request, not a background upgrade timer. Automatic
 self-update concerns mise itself; it does not continuously update `usage` or

@@ -5,8 +5,8 @@
 # Change the default city used by `wttr`.
 # export WEATHER_CITY='Berlin'
 
-# Use Vi editing in the shell; the shared default is Emacs editing.
-# bindkey -v
+# Use Emacs editing in the shell; the shared default is Vi editing.
+# bindkey -e
 
 # Show you-should-use alias reminders after the command finishes:
 # export YSU_MESSAGE_POSITION='after'
